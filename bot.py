@@ -4,7 +4,7 @@ import cls  # 各クラス
 import threading
 
 client = discord.Client()  # 接続用オブジェクト
-token = 'NDk1NTU2NzExNzQ3Mjg5MDk4.DpDy1A.a1oUwLkPtvXuq72B9juG8a8TO1s'  # botアカウントのアクセストークン
+token = 'TOKEN'  # botアカウントのアクセストークン
 loop = asyncio.get_event_loop()  # リマインダー用スレッドを投げるためのイベントループ取得
 
 
