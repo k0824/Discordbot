@@ -62,10 +62,10 @@ def tbs(msg):
     dic = OrderedDict()
     # ラウンドスケジュール及びタイムスケジュール
     rounds = ['第1', '第2', '第3', '第4', '第5', '第6', '第7', '最終']
-    time_first_day = [1500, 1850, 1900, 2250]
-    time_mid_day = [700, 1250, 1300, 1850, 1900, 2250]
+    time_first_day = [1500, 1800, 1850, 1900, 2200, 2250]
+    time_mid_day = [700, 1200, 1250, 1300, 1800, 1850, 1900, 2200, 2250]
     # 開始日を yymmdd の形式で取得
-    first_day = msg[11:17]
+    first_day = list(map(str, msg.content.split()))[2]
     first_day = '20' + first_day
     # 各ラウンドのタイムスケジュールを処理 第nラウンドはround=n-1であることに注意
     for round in range(len(rounds)):
@@ -79,7 +79,8 @@ def tbs(msg):
         # timetable に沿ってスケジュールを設定
         for times in timetable:
             # ブロック数に関して
-            block += (timetable.index(times) + 1) % 2
+            if timetable.index(times) % 3 == 0:
+                block += 1
             # first_day との差delta の設定
             delta = timedelta(days=round, seconds=((times - times % 100) / 100 * 60 + (times % 100)) * 60)
             # remind_time の設定
