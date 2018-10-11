@@ -65,7 +65,7 @@ def tbs(msg):
     time_first_day = [1500, 1800, 1850, 1900, 2200, 2250]
     time_mid_day = [700, 1200, 1250, 1300, 1800, 1850, 1900, 2200, 2250]
     # 開始日を yymmdd の形式で取得
-    first_day = list(map(str, msg.content.split()))[2]
+    first_day = list(map(str, msg.split()))[2]
     first_day = '20' + first_day
     # 各ラウンドのタイムスケジュールを処理 第nラウンドはround=n-1であることに注意
     for round in range(len(rounds)):
