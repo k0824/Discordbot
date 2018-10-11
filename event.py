@@ -89,8 +89,10 @@ def tbs(msg):
             except:
                 return False
             remind_time = int(time.mktime(remind_time.utctimetuple()))
-            if timetable.index(times) % 2 == 0:
+            if timetable.index(times) % 3 == 0:
                 dic[remind_time] = '{0} {1}ラウンド 第{2}ブロック 開始です。'.format(__tbs, rounds[round], str(block))
+            elif timetable.index(times) % 3 == 1:
+                dic[remind_time] = '{0} {1}ラウンド 第{2}ブロック ゴールデンタイム開始です。'.format(__tbs, rounds[round], str(block))
             else:
                 dic[remind_time] = '{0} {1}ラウンド 第{2}ブロック 終了10分前です。'.format(__tbs, rounds[round], str(block))
     return dic
