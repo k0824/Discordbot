@@ -24,11 +24,21 @@ async def on_message(message):
         remind_thread = threading.Thread(target=cls.Reminder.remind, args=(message, client, loop))
         remind_thread.start()
 
+    # /info reminder でリマインダーの設定情報を出力
+    if message.content.startswith('/sched reminder'):
+        reply = cls.DataBase.info_reminders()
+        await client.send_message(message.channel, reply)
+
     # /event ### YYMMDD で YYMMDD日開始の###イベントに対してリマインダーを作成
     if message.content.startswith('/event'):
         event_thread = threading.Thread(target=cls.Event.remind, args=(message, client, loop))
         event_thread.start()
         await client.send_message(message.channel, 'イベントスケジュールを読み込みます......')
+
+    # /info event で現在設定されているイベントスケジュールの情報を出力
+    if message.content.startswith('/sched event'):
+        reply = cls.DataBase.info_events()
+        await client.send_message(message.channel, reply)
 
     # /neko
     if message.content.startswith('/neko'):

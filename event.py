@@ -15,7 +15,7 @@ def dlf(msg):
     time_mid_day = [2200, 2350, 10700, 10850, 11200, 11250, 11900, 12050]
     time_last_day = [2200, 2350, 10700, 10850, 11200, 11250, 11800, 11850, 12100, 12250]
     # 開始日を yymmdd の形式で取得
-    first_day = msg[11:17]
+    first_day = msg.split()[-1]
     first_day = '20' + first_day
     # 各ラウンドのタイムスケジュールを処理 第nラウンドはround=n-1であることに注意
     for round in range(len(rounds)):
