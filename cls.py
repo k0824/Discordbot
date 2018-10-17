@@ -80,6 +80,7 @@ class Tachibana:  # 橘です！用クラス
     def reply(cls):
         return random.choice(cls.reply_list)
 
+
 class IdolInfo:  # idolinfo用クラス
     @staticmethod
     def info(name):
@@ -89,6 +90,7 @@ class IdolInfo:  # idolinfo用クラス
             if info is not None:
                 ret += '{0} : {1}   '.format(item, info)
         return ret
+
 
 class Reminder:  # リマインダー用クラス
 
