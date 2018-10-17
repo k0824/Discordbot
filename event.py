@@ -6,7 +6,7 @@ from collections import OrderedDict
 
 # ドリームLIVEフェスティバル
 def dlf(msg):
-    __dlf = 'ドリームLIVEフェスティバル'
+    name = 'ドリームLIVEフェスティバル'
     # 最後に返す辞書式配列を定義
     dic = OrderedDict()
     # ラウンドスケジュール及びタイムスケジュール
@@ -44,20 +44,20 @@ def dlf(msg):
                 return False
             remind_time = int(time.mktime(remind_time.utctimetuple()))
             if times == timetable[0]:
-                dic[remind_time] = __dlf + ' ' + rounds[round] + 'ラウンド及びチャンスタイム開始です'
+                dic[remind_time] = '{0} {1}ラウンド及びチャンスタイム開始です'.format(name, rounds[round])
             elif times == timetable[-1]:
-                dic[remind_time] = __dlf + ' ' + rounds[round] + 'ラウンド終了10分前です'
+                dic[remind_time] = '{0} {1}ラウンド終了10分前です'.format(name, rounds[round])
             else:
-                if timetable.index(times) % 2 == 1:
-                    dic[remind_time] = __dlf + ' ' + 'FEVERタイム終了10分前です'
+                if timetable.index(times) % 2 == 0:
+                    dic[remind_time] = '{0} FEVERタイム開始です'.format(name)
                 else:
-                    dic[remind_time] = __dlf + ' ' + 'FEVERタイム開始です'
+                    dic[remind_time] = '{0} FEVERタイム終了10分前です'.format(name)
     return dic
 
 
 # トークバトルショー
 def tbs(msg):
-    __tbs = 'トークバトルショー'
+    name = 'トークバトルショー'
     # 最後に返す辞書式配列を定義
     dic = OrderedDict()
     # ラウンドスケジュール及びタイムスケジュール
@@ -90,17 +90,65 @@ def tbs(msg):
                 return False
             remind_time = int(time.mktime(remind_time.utctimetuple()))
             if timetable.index(times) % 3 == 0:
-                dic[remind_time] = '{0} {1}ラウンド 第{2}ブロック 開始です。'.format(__tbs, rounds[round], str(block))
+                dic[remind_time] = '{0} {1}ラウンド 第{2}ブロック 開始です。'.format(name, rounds[round], str(block))
             elif timetable.index(times) % 3 == 1:
-                dic[remind_time] = '{0} {1}ラウンド 第{2}ブロック ゴールデンタイム開始です。'.format(__tbs, rounds[round], str(block))
+                dic[remind_time] = '{0} {1}ラウンド 第{2}ブロック ゴールデンタイム開始です。'.format(name, rounds[round], str(block))
             else:
-                dic[remind_time] = '{0} {1}ラウンド 第{2}ブロック 終了10分前です。'.format(__tbs, rounds[round], str(block))
+                dic[remind_time] = '{0} {1}ラウンド 第{2}ブロック 終了10分前です。'.format(name, rounds[round], str(block))
+    return dic
+
+
+# LIVEツアーカーニバル
+def ltc(msg):
+    name = 'LIVEツアーカーニバル'
+    # 最後に返す辞書式配列を定義
+    dic = OrderedDict()
+    # ラウンドスケジュール及びタイムスケジュール
+    rounds = ['第1', '第2', '第3', '第4', '第5', '第6', '第7', '最終']
+    time_first_day = [1500, 12030, 12050]
+    time_mid_day = [2200, 12030, 12050]
+    time_last_day = [2200, 12230, 12250]
+    # 開始日を yymmdd の形式で取得
+    first_day = list(map(str, msg.split()))[2]
+    first_day = '20' + first_day
+    # 各ラウンドのタイムスケジュールを処理 第nラウンドはround=n-1であることに注意
+    for round in range(len(rounds)):
+        # 読み込むタイムテーブルを判別
+        if round == 0:
+            timetable = time_first_day
+        elif round == 7:
+            timetable = time_last_day
+        else:
+            timetable = time_mid_day
+        # timetable に沿ってスケジュールを設定
+        for times in timetable:
+            # first_day との差delta の設定
+            delta = timedelta(days=round)
+            if times >= 10000:
+                delta += timedelta(days=1)
+                time_ = times - 10000
+            else:
+                delta = delta
+                time_ = times
+            delta += timedelta(seconds=((time_ - time_ % 100) / 100 * 60 + (time_ % 100)) * 60)
+            # remind_time の設定
+            try:
+                remind_time = datetime.strptime(first_day, '%Y%m%d') + delta
+            except:
+                return False
+            remind_time = int(time.mktime(remind_time.utctimetuple()))
+            if timetable.index(times) % 3 == 0:
+                dic[remind_time] = '{0} {1}ラウンド 開始です。'.format(name, rounds[round])
+            elif timetable.index(times) % 3 == 1:
+                dic[remind_time] = '{0} {1}ラウンド 終了30分前です。'.format(name, rounds[round])
+            else:
+                dic[remind_time] = '{0} {1}ラウンド 終了10分前です。'.format(name, rounds[round])
     return dic
 
 
 # ぷちデレラコレクション
 def pdc(msg):
-    __pdc = 'ぷちデレラコレクション'
+    name = 'ぷちデレラコレクション'
     # 最後に返す辞書式配列を定義
     dic = OrderedDict()
     # ラウンドスケジュール及びタイムスケジュール
@@ -132,7 +180,7 @@ def pdc(msg):
                 return False
             remind_time = int(time.mktime(remind_time.utctimetuple()))
             if timetable.index(times) % 2 == 0:
-                dic[remind_time] = __pdc + ' ' + rounds[round] + 'ラウンド 第' + str(stage) + 'ステージ 開始です。'
+                dic[remind_time] = name + ' ' + rounds[round] + 'ラウンド 第' + str(stage) + 'ステージ 開始です。'
             else:
-                dic[remind_time] = __pdc + ' ' + rounds[round] + 'ラウンド 第' + str(stage) + 'ステージ 終了10分前です。'
+                dic[remind_time] = name + ' ' + rounds[round] + 'ラウンド 第' + str(stage) + 'ステージ 終了10分前です。'
     return dic

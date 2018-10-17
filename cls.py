@@ -77,6 +77,8 @@ class Event:  # イベントスケジューラ用クラス
             event_schedule = event.dlf(msg.content)
         elif event_type == 'tbs':
             event_schedule = event.tbs(msg.content)
+        elif event_type == 'ltc':
+            event_schedule = event.ltc(msg.content)
         if event_schedule is False:
             asyncio.async(client.send_message(msg.channel, '入力形式が間違っています。 /event dlf 180731 のように入力してください。'), loop=loop)
             return 0
