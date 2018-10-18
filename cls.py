@@ -133,6 +133,8 @@ class Event:  # イベントスケジューラ用クラス
             event_schedule = event.dlf(msg.content)
         elif event_type == 'tbs':
             event_schedule = event.tbs(msg.content)
+        elif event_type == 'ltc':
+            event_schedule = event.ltc(msg.content)
         else:
             event_schedule = False
         if event_schedule is False:
