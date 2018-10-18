@@ -27,15 +27,19 @@ class DataBase:  # データベース用クラス
     def insert_reminders(cls, _time, msg):
         conn = sqlite3.connect(cls.db_name)
         c = conn.cursor()
-        c.execute('insert into reminders (ID, time, message) values (?, ?, ?)', (gen_id(), _time, msg))
+        _id = gen_id()
+        c.execute('insert into reminders (ID, time, message) values (?, ?, ?)', (_id, _time, msg))
         conn.commit()
+        return _id
 
     @classmethod
     def insert_events(cls, start_day, event_type):
         conn = sqlite3.connect(cls.db_name)
         c = conn.cursor()
-        c.execute('insert into event_schedules (ID, start_day, event_type) values (?, ?, ?)', (gen_id(), start_day, event_type))
+        _id = gen_id()
+        c.execute('insert into event_schedules (ID, start_day, event_type) values (?, ?, ?)', (_id, start_day, event_type))
         conn.commit()
+        return _id
 
     @classmethod
     def info_reminders(cls):
@@ -45,7 +49,7 @@ class DataBase:  # データベース用クラス
         reminder_list = list(map(str, c.execute('select ID, time, message from reminders')))
         for item in reminder_list:
             _id, time1, time2, msg = map(str, item.replace('(', '').replace(')', '').replace("'", '').replace(',', '').split())
-            ret += 'ID : {1} | {1} {2} : {3}\n'.format(_id, time1, time2, msg)
+            ret += 'ID : {0} | {1} {2} : {3}\n'.format(_id, time1, time2, msg)
         return ret
 
     @classmethod
@@ -79,7 +83,6 @@ class DataBase:  # データベース用クラス
             return '指定のテーブルにそのIDのレコードは存在しません。'
 
 
-
 class Tachibana:  # 橘です！用クラス
     val = False
     reply_list = ['橘です。', '橘です！', '名前で呼ばないでください！', '......ありすでいいです']
@@ -108,10 +111,11 @@ class IdolInfo:  # idolinfo用クラス
 
 
 class Reminder:  # リマインダー用クラス
+    event_dict = {}
+    scheduler = sched.scheduler(time.time, time.sleep)
 
-    @staticmethod
-    def remind(msg, client, loop, insert_flag = True):
-        scheduler = sched.scheduler(time.time, time.sleep)
+    @classmethod
+    def remind(cls, msg, client, loop, insert_flag = True):
         run_at = msg.content.split()[1]
         run_at = '20' + run_at
         try:
@@ -124,24 +128,38 @@ class Reminder:  # リマインダー用クラス
             asyncio.async(client.send_message(msg.channel, '入力した日時が過去のものです。'), loop=loop)
             return 0
         run_at = int(time.mktime(run_at.utctimetuple()))
-        msg.content = msg.content.split()[2]
-        if msg.content == '':
-            msg.content = msg.author.mention + ' リマインダーです'
-        else:
-            msg.content = msg.author.mention + ' ' + msg.content
-        scheduler.enterabs(run_at, 1, Send.send, argument=(msg, client, loop))
+        try:
+            msg.content = '{0} {1}'.format(msg.author.mention, msg.content.split()[2])
+        except IndexError:
+            msg.content = '{0} リマインダーです'.format(msg.author.mention)
         if insert_flag:
-            DataBase.insert_reminders(time.strftime('%Y/%m/%d %H:%M', time.localtime(run_at)), msg.content.split()[-1])
+            _id = DataBase.insert_reminders(time.strftime('%Y/%m/%d %H:%M', time.localtime(run_at)), msg.content.split()[-1])
+        else:
+            _id = 0
+        cls.event_dict[_id] = cls.scheduler.enterabs(run_at, 1, Send.send, argument=(msg, client, loop))
+        cls.scheduler.enterabs(run_at + 1, 1, cls.cancel, argument=('reminders', _id))
         asyncio.async(client.send_message(msg.channel, 'リマインダーを設定しました。'), loop=loop)
-        scheduler.run()
+        cls.scheduler.run()
+
+    @classmethod
+    def cancel(cls, table, _id, flag = True):
+        _event = cls.event_dict.pop(int(_id))
+        try:
+            cls.scheduler.cancel(_event)
+        except:
+            pass
+        return DataBase.delete(table, _id)
 
 
 class Event:  # イベントスケジューラ用クラス
-    @staticmethod
-    def remind(msg, client, loop, insert_flag = True):
+    event_dict = {}
+    event_scheduler = sched.scheduler(time.time, time.sleep)
+
+    @classmethod
+    def remind(cls, msg, client, loop, insert_flag = True):
         global event_schedule
+        event_list = []
         time_now = datetime.now()
-        event_scheduler = sched.scheduler(time.time, time.sleep)
         event_type = msg.content.split()[1]
         if event_type == 'dlf':
             event_schedule = event.dlf(msg.content)
@@ -155,9 +173,23 @@ class Event:  # イベントスケジューラ用クラス
             asyncio.async(client.send_message(msg.channel, '入力形式が間違っています。 /event dlf 180731 のように入力してください。'), loop=loop)
             return 0
         if insert_flag:
-            DataBase.insert_events(msg.content.split()[2], msg.content.split()[1])
+            _id = DataBase.insert_events(msg.content.split()[2], msg.content.split()[1])
+        else:
+            _id = 0
         for remind_time, remind_msg in event_schedule.items():
             if remind_time > int(time.mktime(time_now.utctimetuple())):
-                event_scheduler.enterabs(remind_time, 1, Send.send, argument=(msg, client, loop, remind_msg))
+                event_list.append(cls.event_scheduler.enterabs(remind_time, 1, Send.send, argument=(msg, client, loop, remind_msg)))
+        cls.event_scheduler.enterabs(list(event_schedule.keys())[-1] + 1, 1, cls.cancel, argument=('event_schedules', _id))
+        cls.event_dict[_id] = event_list
         asyncio.async(client.send_message(msg.channel, 'イベントスケジュールを正常に読み込みました。'), loop=loop)
-        event_scheduler.run()
+        cls.event_scheduler.run()
+
+    @classmethod
+    def cancel(cls, table, _id):
+        event_list = cls.event_dict.pop(int(_id))
+        for _event in event_list:
+            try:
+                cls.event_scheduler.cancel(_event)
+            except:
+                pass
+        return DataBase.delete(table, _id)

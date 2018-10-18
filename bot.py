@@ -25,7 +25,7 @@ async def on_message(message):
         remind_thread.start()
 
     # /sched reminder でリマインダーの設定情報を出力
-    if message.content.startswith('/sched reminder'):
+    if message.content.startswith('/sched remind'):
         reply = cls.DataBase.info_reminders()
         await client.send_message(message.channel, reply)
 
@@ -43,11 +43,15 @@ async def on_message(message):
     # /delete table ID でテーブル内指定IDのレコードを削除
     if message.content.startswith('/delete'):
         _, table, _id = message.content.split()
+        reply = ''
         if table.startswith('remind'):
             table = 'reminders'
+            reply += cls.Reminder.cancel(table, _id)
         elif table.startswith('event'):
             table = 'event_schedules'
-        reply = cls.DataBase.delete(table, _id)
+            reply += cls.Event.cancel(table, _id)
+        else:
+            reply += 'テーブル {0} は見つかりませんでした。'.format(table)
         await client.send_message(message.channel, reply)
 
     # /neko
