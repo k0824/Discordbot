@@ -8,6 +8,10 @@ import event
 import idolinfo
 
 
+def gen_id():
+    return int(time.mktime(datetime.now().utctimetuple())) % 10000
+
+
 class Send:  # メッセージ送信用クラス
     @staticmethod
     def send(msg, client, loop, reply=None):
@@ -23,14 +27,14 @@ class DataBase:  # データベース用クラス
     def insert_reminders(cls, _time, msg):
         conn = sqlite3.connect(cls.db_name)
         c = conn.cursor()
-        c.execute('insert into reminders (time, message) values (?, ?)', (_time, msg))
+        c.execute('insert into reminders (ID, time, message) values (?, ?, ?)', (gen_id(), _time, msg))
         conn.commit()
 
     @classmethod
     def insert_events(cls, start_day, event_type):
         conn = sqlite3.connect(cls.db_name)
         c = conn.cursor()
-        c.execute('insert into event_schedules (start_day, event_type) values (?, ?)', (start_day, event_type))
+        c.execute('insert into event_schedules (ID, start_day, event_type) values (?, ?, ?)', (gen_id(), start_day, event_type))
         conn.commit()
 
     @classmethod
@@ -38,10 +42,10 @@ class DataBase:  # データベース用クラス
         conn = sqlite3.connect(cls.db_name)
         c = conn.cursor()
         ret = '現在設定されているリマインダー一覧です:\n'
-        reminder_list = list(map(str, c.execute('select time, message from reminders')))
+        reminder_list = list(map(str, c.execute('select ID, time, message from reminders')))
         for item in reminder_list:
-            time1, time2, msg = map(str, item.replace('(', '').replace(')', '').replace("'", '').replace(',', '').split())
-            ret += '{0} {1} : {2}\n'.format(time1, time2, msg)
+            _id, time1, time2, msg = map(str, item.replace('(', '').replace(')', '').replace("'", '').replace(',', '').split())
+            ret += 'ID : {1} | {1} {2} : {3}\n'.format(_id, time1, time2, msg)
         return ret
 
     @classmethod
@@ -49,9 +53,9 @@ class DataBase:  # データベース用クラス
         conn = sqlite3.connect(cls.db_name)
         c = conn.cursor()
         ret = '現在設定されているイベント一覧です:\n'
-        event_schedules = list(map(str, c.execute('select start_day, event_type from event_schedules')))
+        event_schedules = list(map(str, c.execute('select ID, start_day, event_type from event_schedules')))
         for item in event_schedules:
-            _time, _type = map(str, item.replace('(', '').replace(')', '').replace("'", '').replace(',', '').split())
+            _id, _time, _type = map(str, item.replace('(', '').replace(')', '').replace("'", '').replace(',', '').split())
             if _type == 'dlf':
                 _type = 'ドリームLIVEフェスティバル'
             elif _type == 'tbs':
@@ -60,8 +64,20 @@ class DataBase:  # データベース用クラス
                 _type = 'ぷちデレラコレクション'
             elif _type == 'ltc':
                 _type = 'LIVEツアーカーニバル'
-            ret += '20{0}/{1}/{2} 開始 {3}\n'.format(_time[0]+_time[1], _time[2]+_time[3], _time[4]+_time[5], _type)
+            ret += 'ID : {0} | 20{1}/{2}/{3} 開始 {4}\n'.format(_id, _time[0]+_time[1], _time[2]+_time[3], _time[4]+_time[5], _type)
         return ret
+
+    @classmethod
+    def delete(cls, table, _id):
+        conn = sqlite3.connect(cls.db_name)
+        c = conn.cursor()
+        try:
+            c.execute('delete from {0} where ID = {1}'.format(table, _id))
+            conn.commit()
+            return '{0} テーブルから ID:{1} のレコードを削除しました。'.format(table, _id)
+        except:
+            return '指定のテーブルにそのIDのレコードは存在しません。'
+
 
 
 class Tachibana:  # 橘です！用クラス

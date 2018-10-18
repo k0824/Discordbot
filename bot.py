@@ -24,7 +24,7 @@ async def on_message(message):
         remind_thread = threading.Thread(target=cls.Reminder.remind, args=(message, client, loop))
         remind_thread.start()
 
-    # /info reminder でリマインダーの設定情報を出力
+    # /sched reminder でリマインダーの設定情報を出力
     if message.content.startswith('/sched reminder'):
         reply = cls.DataBase.info_reminders()
         await client.send_message(message.channel, reply)
@@ -35,9 +35,19 @@ async def on_message(message):
         event_thread.start()
         await client.send_message(message.channel, 'イベントスケジュールを読み込みます......')
 
-    # /info event で現在設定されているイベントスケジュールの情報を出力
+    # /sched event で現在設定されているイベントスケジュールの情報を出力
     if message.content.startswith('/sched event'):
         reply = cls.DataBase.info_events()
+        await client.send_message(message.channel, reply)
+
+    # /delete table ID でテーブル内指定IDのレコードを削除
+    if message.content.startswith('/delete'):
+        _, table, _id = message.content.split()
+        if table.startswith('remind'):
+            table = 'reminders'
+        elif table.startswith('event'):
+            table = 'event_schedules'
+        reply = cls.DataBase.delete(table, _id)
         await client.send_message(message.channel, reply)
 
     # /neko
