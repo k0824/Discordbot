@@ -142,7 +142,7 @@ class Reminder:  # リマインダー用クラス
         cls.scheduler.run()
 
     @classmethod
-    def cancel(cls, table, _id, flag = True):
+    def cancel(cls, table, _id):
         _event = cls.event_dict.pop(int(_id))
         try:
             cls.scheduler.cancel(_event)

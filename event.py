@@ -44,7 +44,7 @@ def dlf(msg):
                 return False
             remind_time = int(time.mktime(remind_time.utctimetuple()))
             if times == timetable[0]:
-                dic[remind_time] = '{0} {1}ラウンド及びチャンスタイム開始です'.format(name, rounds[round])
+                dic[remind_time] = '{0} {1}ラウンド及びFEVERタイム開始です'.format(name, rounds[round])
             elif times == timetable[-1]:
                 dic[remind_time] = '{0} {1}ラウンド終了10分前です'.format(name, rounds[round])
             else:

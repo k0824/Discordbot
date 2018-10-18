@@ -1,3 +1,10 @@
+"""--------------------
+FlutCla's bot ver 1.0.0
+レファレンス : https://hackmd.io/AZJWZiG-QxaQVn7x1eTxDA
+作成 : @fl_cl_sk / @fl_cl_p
+協力 : @_apple4545_
+--------------------"""
+
 import discord  # discord 用パッケージ
 import asyncio  # asyncIO
 import cls  # 各クラス
@@ -77,7 +84,7 @@ async def on_message(message):
 
     # /clear でログを全削除
     if message.content.startswith('/clear'):
-        await client.send_message(message.channel, 'チャンネル内のログをすべて消去します。よろしければ yes を送信してください')
+        await client.send_message(message.channel, 'チャンネル内のログをすべて消去します。よろしければ30秒以内に yes を送信してください')
         msg = await client.wait_for_message(timeout=30, author=message.author, channel=message.channel)
         if msg.content == 'yes':
             clean_flag = True
