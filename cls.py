@@ -19,7 +19,6 @@ class Send:  # メッセージ送信用クラス
 class DataBase:  # データベース用クラス
     db_name = 'database.db'
 
-
     @classmethod
     def insert_reminders(cls, _time, msg):
         conn = sqlite3.connect(cls.db_name)
@@ -121,7 +120,6 @@ class Reminder:  # リマインダー用クラス
         scheduler.run()
 
 
-
 class Event:  # イベントスケジューラ用クラス
     @staticmethod
     def remind(msg, client, loop, insert_flag = True):
@@ -133,6 +131,8 @@ class Event:  # イベントスケジューラ用クラス
             event_schedule = event.dlf(msg.content)
         elif event_type == 'tbs':
             event_schedule = event.tbs(msg.content)
+        elif event_type == 'ltc':
+            event_schedule = event.ltc(msg.content)
         else:
             event_schedule = False
         if event_schedule is False:
