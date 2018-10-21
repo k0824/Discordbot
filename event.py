@@ -5,7 +5,7 @@ from collections import OrderedDict
 
 
 # ドリームLIVEフェスティバル
-def dlf(msg):
+def dlf(first_day):
     name = 'ドリームLIVEフェスティバル'
     # 最後に返す辞書式配列を定義
     dic = OrderedDict()
@@ -15,7 +15,6 @@ def dlf(msg):
     time_mid_day = [2200, 2350, 10700, 10850, 11200, 11250, 11900, 12050]
     time_last_day = [2200, 2350, 10700, 10850, 11200, 11250, 11800, 11850, 12100, 12250]
     # 開始日を yymmdd の形式で取得
-    first_day = msg.split()[-1]
     first_day = '20' + first_day
     # 各ラウンドのタイムスケジュールを処理 第nラウンドはround=n-1であることに注意
     for round in range(len(rounds)):
@@ -56,7 +55,7 @@ def dlf(msg):
 
 
 # トークバトルショー
-def tbs(msg):
+def tbs(first_day):
     name = 'トークバトルショー'
     # 最後に返す辞書式配列を定義
     dic = OrderedDict()
@@ -65,7 +64,6 @@ def tbs(msg):
     time_first_day = [1500, 1800, 1850, 1900, 2200, 2250]
     time_mid_day = [700, 1200, 1250, 1300, 1800, 1850, 1900, 2200, 2250]
     # 開始日を yymmdd の形式で取得
-    first_day = list(map(str, msg.split()))[2]
     first_day = '20' + first_day
     # 各ラウンドのタイムスケジュールを処理 第nラウンドはround=n-1であることに注意
     for round in range(len(rounds)):
@@ -99,7 +97,7 @@ def tbs(msg):
 
 
 # LIVEツアーカーニバル
-def ltc(msg):
+def ltc(first_day):
     name = 'LIVEツアーカーニバル'
     # 最後に返す辞書式配列を定義
     dic = OrderedDict()
@@ -109,7 +107,6 @@ def ltc(msg):
     time_mid_day = [2200, 12030, 12050]
     time_last_day = [2200, 12230, 12250]
     # 開始日を yymmdd の形式で取得
-    first_day = list(map(str, msg.split()))[2]
     first_day = '20' + first_day
     # 各ラウンドのタイムスケジュールを処理 第nラウンドはround=n-1であることに注意
     for round in range(len(rounds)):
@@ -147,7 +144,7 @@ def ltc(msg):
 
 
 # ぷちデレラコレクション
-def pdc(msg):
+def pdc(first_day):
     name = 'ぷちデレラコレクション'
     # 最後に返す辞書式配列を定義
     dic = OrderedDict()
@@ -156,7 +153,6 @@ def pdc(msg):
     time_first_day = [1500, 1550, 1900, 1950, 2100, 2250]
     time_mid_day = [1200, 1250, 1900, 1950, 2100, 2250]
     # 開始日を yymmdd の形式で取得
-    first_day = msg[11:17]
     first_day = '20' + first_day
     # 各ラウンドのタイムスケジュールを処理 第nラウンドはround=n-1であることに注意
     for round in range(len(rounds)):

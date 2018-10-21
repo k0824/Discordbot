@@ -1,5 +1,5 @@
 """--------------------
-FlutCla's bot ver 1.0.0
+FlutCla's bot ver 1.1.0
 レファレンス : https://hackmd.io/AZJWZiG-QxaQVn7x1eTxDA
 作成 : @fl_cl_sk / @fl_cl_p
 協力 : @_apple4545_
@@ -19,6 +19,7 @@ loop = asyncio.get_event_loop()  # リマインダー用スレッドを投げる
 # 起動時の処理
 @client.event
 async def on_ready():
+    cls.DataBase.on_boot(client, loop)
     print('ログインが完了しました')
 
 
@@ -26,53 +27,73 @@ async def on_ready():
 @client.event
 async def on_message(message):
 
-    # /remind
-    if message.content.startswith('/remind'):
-        remind_thread = threading.Thread(target=cls.Reminder.remind, args=(message, client, loop))
-        remind_thread.start()
+    # /sched 系統
+    if message.content.startswith('/sched'):
+        # /sched remind
+        if message.content.split()[1] == 'remind':
+            # 入力形式をチェックしつつ処理
+            try:
+                # リマインドする時間を取得
+                _time = message.content.split()[2]
+                # リマインド時に送信するメッセージを取得
+                try:
+                    msg = list(message.content.split())[3:]
+                except:
+                    msg = 'リマインダーです。'
+                if not msg:
+                    msg = 'リマインダーです。'
+                # Remindクラスのオブジェクトを生成
+                remind = cls.Remind(message.server.id, message.channel.id, client, _time, loop, msg, message.author.mention, message.author.display_name)
+                # スレッドに投げて実行
+                remind_thread = threading.Thread(target=remind.set)
+                remind_thread.start()
+            except:
+                await client.send_message(message.channel, '正常に処理できませんでした。入力形式を確認してください。')
 
-    # /sched reminder でリマインダーの設定情報を出力
-    if message.content.startswith('/sched remind'):
-        reply = cls.DataBase.info_reminders()
-        await client.send_message(message.channel, reply)
+        # /sched event
+        elif message.content.split()[1] == 'event':
+            # 入力形式をチェックしつつ処理
+            try:
+                # イベントの開始日を取得
+                _time = message.content.split()[2]
+                # イベントの種類を取得
+                _type = message.content.split()[3]
+                # Eventクラスのオブジェクトを生成
+                event = cls.Event(message.server.id, message.channel.id, client, _time, loop, _type)
+                # スレッドに投げて実行
+                event_thread = threading.Thread(target=event.set)
+                event_thread.start()
+            except:
+                await client.send_message(message.channel, '正常に処理できませんでした。入力形式を確認してください。')
 
-    # /event ### YYMMDD で YYMMDD日開始の###イベントに対してリマインダーを作成
-    if message.content.startswith('/event'):
-        event_thread = threading.Thread(target=cls.Event.remind, args=(message, client, loop))
-        event_thread.start()
-        await client.send_message(message.channel, 'イベントスケジュールを読み込みます......')
+        # /sched info
+        elif message.content.split()[1] == 'info':
+            reply = cls.DataBase.info(message.server.id)
+            await client.send_message(message.channel, reply)
 
-    # /sched event で現在設定されているイベントスケジュールの情報を出力
-    if message.content.startswith('/sched event'):
-        reply = cls.DataBase.info_events()
-        await client.send_message(message.channel, reply)
-
-    # /delete table ID でテーブル内指定IDのレコードを削除
-    if message.content.startswith('/delete'):
-        _, table, _id = message.content.split()
-        reply = ''
-        if table.startswith('remind'):
-            table = 'reminders'
-            reply += cls.Reminder.cancel(table, _id)
-        elif table.startswith('event'):
-            table = 'event_schedules'
-            reply += cls.Event.cancel(table, _id)
-        else:
-            reply += 'テーブル {0} は見つかりませんでした。'.format(table)
-        await client.send_message(message.channel, reply)
+        # /sched delete
+        elif message.content.split()[1] == 'delete':
+            _, _, table, _id = message.content.split()
+            if table.startswith('remind'):
+                reply = cls.Remind.cancel(_id)
+            elif table.startswith('event'):
+                reply = cls.Event.cancel(_id)
+            else:
+                reply = 'テーブル {0} は見つかりませんでした。'.format(table)
+            await client.send_message(message.channel, reply)
 
     # /neko
-    if message.content.startswith('/neko'):
+    elif message.content.startswith('/neko'):
         await client.send_message(message.channel, 'にゃーん')
 
     # idolinfo
-    if message.content.startswith('/info'):
+    elif message.content.startswith('/info'):
         name = list(map(str, message.content.split()))[1]
         reply = cls.IdolInfo.info(name)
         await client.send_message(message.channel, reply)
 
     # 'ありす' に反応
-    if 'ありす' in message.content and client.user != message.author and cls.Tachibana.val is True:
+    elif 'ありす' in message.content and client.user != message.author and cls.Tachibana.val is True:
         await client.send_message(message.channel, cls.Tachibana.reply())
     # /tachibana によるトグル
     if message.content.startswith('/tachibana'):
@@ -83,7 +104,7 @@ async def on_message(message):
             await client.send_message(message.channel, '橘を無効化しました')
 
     # /clear でログを全削除
-    if message.content.startswith('/clear'):
+    elif message.content.startswith('/clear'):
         await client.send_message(message.channel, 'チャンネル内のログをすべて消去します。よろしければ30秒以内に yes を送信してください')
         msg = await client.wait_for_message(timeout=30, author=message.author, channel=message.channel)
         if msg.content == 'yes':
@@ -97,6 +118,18 @@ async def on_message(message):
                     await client.send_message(message.channel, 'ログの全削除が完了しました')
         else:
             await client.send_message(message.channel, '処理を中断しました')
+
+'''
+    # /sched reminder でリマインダーの設定情報を出力
+    if message.content.startswith('/sched remind'):
+        reply = cls.DataBase.info_reminders()
+        await client.send_message(message.channel, reply)
+
+    # /sched event で現在設定されているイベントスケジュールの情報を出力
+    if message.content.startswith('/sched event'):
+        reply = cls.DataBase.info_events()
+        await client.send_message(message.channel, reply)
+'''
 
 # botの起動と接続
 client.run(token)
