@@ -1,5 +1,5 @@
 """--------------------
-FlutCla's bot ver 1.1.0
+FlutCla's bot ver 1.1.1
 レファレンス : https://hackmd.io/AZJWZiG-QxaQVn7x1eTxDA
 作成 : @fl_cl_sk / @fl_cl_p
 協力 : @_apple4545_

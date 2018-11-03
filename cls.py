@@ -135,15 +135,18 @@ class Schedule:
     # guild : msg.guild.id
     # time : msg.content.split()[2]
     # channel : msg.channel
-    def __init__(self, guild, channel_id, client, time, loop, _id=gen_id(), insert_flag=True):
+    def __init__(self, guild, channel_id, client, time, loop, _id=1000000, insert_flag=True):
         self.guild = guild
         self.channel_id = channel_id
         self.channel = client.get_channel(channel_id)
         self.client = client
         self.loop = loop
         self.insert_flag = insert_flag
-        self.id = _id
         self.time = time
+        if _id == 1000000:
+            self.id = gen_id()
+        else:
+            self.id = _id
 
 
 class Remind(Schedule):
@@ -151,7 +154,7 @@ class Remind(Schedule):
     # msg = msg.content.split()[3] OR 'リマインダーです。'
     # reply_at = msg.author.mention
     # author = msg.author.display_name
-    def __init__(self, guild, channel, client, time, loop, msg, reply_at, author, _id=gen_id(), insert_flag=True):
+    def __init__(self, guild, channel, client, time, loop, msg, reply_at, author, _id=1000000, insert_flag=True):
         super().__init__(guild, channel, client, time, loop, _id, insert_flag)
         self.msg = ' '.join(msg)
         self.reply_at = reply_at
@@ -176,7 +179,7 @@ class Remind(Schedule):
         if self.insert_flag:
             DataBase.insert(self.id, self.time, self.msg, self.table, self.guild, self.channel_id, self.reply_at, self.author)
         # Event を scheduler に登録、Event情報をIDと紐づけて辞書 super().event_dict に保管
-        super().event_dict[self.id] = super().scheduler.enterabs(run_at_at, 1, send, argument=('{0} {1}'.format(self.reply_at, self.msg), self.channel, self.client, self.loop))
+        super().event_dict[self.id] = super().scheduler.enterabs(run_at_at, 1, send, argument=('{0} : {1}'.format(self.reply_at, self.msg), self.channel, self.client, self.loop))
         # 正常にリマインド出来たらキャンセル関数を走らせる
         super().scheduler.enterabs(run_at_at+1, 1, Remind.cancel, argument=(self.id,))
         # insert_flag が True なら設定完了発言
@@ -188,7 +191,6 @@ class Remind(Schedule):
     # リマインダーキャンセル関数
     @classmethod
     def cancel(cls, _id):
-        print(_id)
         # 親クラスの event_dict から指定したidに合致する Event を pop してキャンセル
         try:
             super().scheduler.cancel(super().event_dict.pop(_id))
@@ -201,7 +203,7 @@ class Remind(Schedule):
 class Event(Schedule):
     # イベント用リマインダーのみ利用する変数の初期化
     # type : msg.content.split()[3]
-    def __init__(self, guild, channel, client, time, loop, _type, _id=gen_id(), insert_flag=True):
+    def __init__(self, guild, channel, client, time, loop, _type, _id=1000000, insert_flag=True):
         super().__init__(guild, channel, client, time, loop, _id, insert_flag)
         self.type = _type
         self.table = 'event_schedules'
@@ -283,89 +285,3 @@ class IdolInfo:  # idolinfo用クラス
             if info is not None:
                 ret += '{0} : {1}   '.format(item, info)
         return ret
-
-'''
-class Reminder:  # リマインダー用クラス
-    event_dict = {}
-    scheduler = sched.scheduler(time.time, time.sleep)
-
-    @classmethod
-    def remind(cls, msg, client, loop, insert_flag=True):
-        run_at = msg.content.split()[1]
-        run_at = '20' + run_at
-        try:
-            run_at = datetime.strptime(run_at, '%Y%m%d%H%M')
-        except:
-            reply = '入力形式が間違っています。2018/7/31 20:30 にリマインダーを設定したい場合は、 /remind 1807312030 リマインド時に送信する文言 のように入力してください。'
-            asyncio.async(client.send_message(msg.channel, reply), loop=loop)
-            return 0
-        if run_at < datetime.now():
-            asyncio.async(client.send_message(msg.channel, '入力した日時が過去のものです。'), loop=loop)
-            return 0
-        run_at = int(time.mktime(run_at.utctimetuple()))
-        try:
-            msg.content = '{0} {1}'.format(msg.author.mention, msg.content.split()[2])
-        except IndexError:
-            msg.content = '{0} リマインダーです'.format(msg.author.mention)
-        if insert_flag:
-            _id = DataBase.insert(time.strftime('%Y/%m/%d %H:%M', time.localtime(run_at)), msg.content.split()[-1], 'reminders')
-        else:
-            _id = 0
-        cls.event_dict[_id] = cls.scheduler.enterabs(run_at, 1, send, argument=(msg, client, loop))
-        cls.scheduler.enterabs(run_at + 1, 1, cls.cancel, argument=('reminders', _id))
-        asyncio.async(client.send_message(msg.channel, 'リマインダーを設定しました。'), loop=loop)
-        cls.scheduler.run()
-
-    @classmethod
-    def cancel(cls, table, _id):
-        _event = cls.event_dict.pop(int(_id))
-        try:
-            cls.scheduler.cancel(_event)
-        except:
-            pass
-        return DataBase.delete(table, _id)
-
-
-class Event:  # イベントスケジューラ用クラス
-    event_dict = {}
-    event_scheduler = sched.scheduler(time.time, time.sleep)
-
-    @classmethod
-    def remind(cls, msg, client, loop, insert_flag=True):
-        global event_schedule
-        event_list = []
-        time_now = datetime.now()
-        event_type = msg.content.split()[1]
-        if event_type == 'dlf':
-            event_schedule = event.dlf(msg.content)
-        elif event_type == 'tbs':
-            event_schedule = event.tbs(msg.content)
-        elif event_type == 'ltc':
-            event_schedule = event.ltc(msg.content)
-        else:
-            event_schedule = False
-        if event_schedule is False:
-            asyncio.async(client.send_message(msg.channel, '入力形式が間違っています。 /event dlf 180731 のように入力してください。'), loop=loop)
-            return 0
-        if insert_flag:
-            _id = DataBase.insert(msg.content.split()[2], msg.content.split()[1], 'event_schedules')
-        else:
-            _id = 0
-        for remind_time, remind_msg in event_schedule.items():
-            if remind_time > int(time.mktime(time_now.utctimetuple())):
-                event_list.append(cls.event_scheduler.enterabs(remind_time, 1, send, argument=(msg, client, loop, remind_msg)))
-        cls.event_scheduler.enterabs(list(event_schedule.keys())[-1] + 1, 1, cls.cancel, argument=('event_schedules', _id))
-        cls.event_dict[_id] = event_list
-        asyncio.async(client.send_message(msg.channel, 'イベントスケジュールを正常に読み込みました。'), loop=loop)
-        cls.event_scheduler.run()
-
-    @classmethod
-    def cancel(cls, table, _id):
-        event_list = cls.event_dict.pop(int(_id))
-        for _event in event_list:
-            try:
-                cls.event_scheduler.cancel(_event)
-            except:
-                pass
-        return DataBase.delete(table, _id)
-'''
