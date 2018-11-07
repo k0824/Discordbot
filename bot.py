@@ -11,9 +11,9 @@ import cls  # 各クラス
 import threading
 from data import GetToken
 
-client = discord.Client()  # 接続用オブジェクト
 token = GetToken.token  # botアカウントのアクセストークン
 loop = asyncio.get_event_loop()  # リマインダー用スレッドを投げるためのイベントループ取得
+client = discord.Client()  # 接続用オブジェクト
 
 
 # 起動時の処理
@@ -95,8 +95,9 @@ async def on_message(message):
     # 'ありす' に反応
     elif 'ありす' in message.content and client.user != message.author and cls.Tachibana.val is True:
         await client.send_message(message.channel, cls.Tachibana.reply())
+
     # /tachibana によるトグル
-    if message.content.startswith('/tachibana'):
+    elif message.content.startswith('/tachibana'):
         cls.Tachibana.toggle()
         if cls.Tachibana.val is True:
             await client.send_message(message.channel, '橘を有効化しました')
@@ -118,18 +119,6 @@ async def on_message(message):
                     await client.send_message(message.channel, 'ログの全削除が完了しました')
         else:
             await client.send_message(message.channel, '処理を中断しました')
-
-'''
-    # /sched reminder でリマインダーの設定情報を出力
-    if message.content.startswith('/sched remind'):
-        reply = cls.DataBase.info_reminders()
-        await client.send_message(message.channel, reply)
-
-    # /sched event で現在設定されているイベントスケジュールの情報を出力
-    if message.content.startswith('/sched event'):
-        reply = cls.DataBase.info_events()
-        await client.send_message(message.channel, reply)
-'''
 
 # botの起動と接続
 client.run(token)

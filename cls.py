@@ -91,38 +91,6 @@ class DataBase:  # データベース用クラス
             event_thread = threading.Thread(target=event.set)
             event_thread.start()
 
-'''
-    @classmethod
-    def info_reminders(cls):
-        conn = sqlite3.connect(cls.db_name)
-        c = conn.cursor()
-        ret = '現在設定されているリマインダー一覧です:\n'
-        reminder_list = list(map(str, c.execute('select ID, time, message from reminders')))
-        for item in reminder_list:
-            _id, time1, time2, msg = map(str, item.replace('(', '').replace(')', '').replace("'", '').replace(',', '').split())
-            ret += 'ID : {0} | {1} {2} : {3}\n'.format(_id, time1, time2, msg)
-        return ret
-
-    @classmethod
-    def info_events(cls):
-        conn = sqlite3.connect(cls.db_name)
-        c = conn.cursor()
-        ret = '現在設定されているイベント一覧です:\n'
-        event_schedules = list(map(str, c.execute('select ID, start_day, event_type from event_schedules')))
-        for item in event_schedules:
-            _id, _time, _type = map(str, item.replace('(', '').replace(')', '').replace("'", '').replace(',', '').split())
-            if _type == 'dlf':
-                _type = 'ドリームLIVEフェスティバル'
-            elif _type == 'tbs':
-                _type = 'トークバトルショー'
-            elif _type == 'pdc':
-                _type = 'ぷちデレラコレクション'
-            elif _type == 'ltc':
-                _type = 'LIVEツアーカーニバル'
-            ret += 'ID : {0} | 20{1}/{2}/{3} 開始 {4}\n'.format(_id, _time[0]+_time[1], _time[2]+_time[3], _time[4]+_time[5], _type)
-        return ret
-'''
-
 
 # sched関連クラス
 class Schedule:
