@@ -4,13 +4,22 @@ from datetime import timedelta
 from collections import OrderedDict
 
 
+# ラウンド名のリストを作成
+def make_round_list(num):
+    rounds = []
+    for i in range(num)[0:-1]:
+        rounds.append('第{0}'.format(i+1))
+    rounds.append('最終')
+    return rounds
+
+
 # ドリームLIVEフェスティバル
-def dlf(first_day):
+def dlf(first_day, round_num):
     name = 'ドリームLIVEフェスティバル'
     # 最後に返す辞書式配列を定義
     dic = OrderedDict()
     # ラウンドスケジュール及びタイムスケジュール
-    rounds = ['第1', '第2', '第3', '第4', '第5', '第6', '最終']
+    rounds = make_round_list(round_num)
     time_first_day = [1800, 1850, 2200, 2350, 10700, 10850, 11200, 11250, 11900, 12050]
     time_mid_day = [2200, 2350, 10700, 10850, 11200, 11250, 11900, 12050]
     time_last_day = [2200, 2350, 10700, 10850, 11200, 11250, 11800, 11850, 12100, 12250]
@@ -21,7 +30,7 @@ def dlf(first_day):
         # 読み込むタイムテーブルを判別
         if round == 0:
             timetable = time_first_day
-        elif round == 6:
+        elif round == round_num - 1:
             timetable = time_last_day
         else:
             timetable = time_mid_day
@@ -55,12 +64,12 @@ def dlf(first_day):
 
 
 # トークバトルショー
-def tbs(first_day):
+def tbs(first_day, round_num):
     name = 'トークバトルショー'
     # 最後に返す辞書式配列を定義
     dic = OrderedDict()
     # ラウンドスケジュール及びタイムスケジュール
-    rounds = ['第1', '第2', '第3', '第4', '第5', '第6', '第7', '最終']
+    rounds = make_round_list(round_num)
     time_first_day = [1500, 1800, 1850, 1900, 2200, 2250]
     time_mid_day = [700, 1200, 1250, 1300, 1800, 1850, 1900, 2200, 2250]
     # 開始日を yymmdd の形式で取得
@@ -97,12 +106,12 @@ def tbs(first_day):
 
 
 # LIVEツアーカーニバル
-def ltc(first_day):
+def ltc(first_day, round_num):
     name = 'LIVEツアーカーニバル'
     # 最後に返す辞書式配列を定義
     dic = OrderedDict()
     # ラウンドスケジュール及びタイムスケジュール
-    rounds = ['第1', '第2', '第3', '第4', '第5', '第6', '第7', '最終']
+    rounds = make_round_list(round_num)
     time_first_day = [1500, 12030, 12050]
     time_mid_day = [2200, 12030, 12050]
     time_last_day = [2200, 12230, 12250]
@@ -113,7 +122,7 @@ def ltc(first_day):
         # 読み込むタイムテーブルを判別
         if round == 0:
             timetable = time_first_day
-        elif round == 7:
+        elif round == round_num - 1:
             timetable = time_last_day
         else:
             timetable = time_mid_day
@@ -144,12 +153,12 @@ def ltc(first_day):
 
 
 # ぷちデレラコレクション
-def pdc(first_day):
+def pdc(first_day, round_num):
     name = 'ぷちデレラコレクション'
     # 最後に返す辞書式配列を定義
     dic = OrderedDict()
     # ラウンドスケジュール及びタイムスケジュール
-    rounds = ['第1', '第2', '第3', '第4', '第5']
+    rounds = make_round_list(round_num)
     time_first_day = [1500, 1550, 1900, 1950, 2100, 2250]
     time_mid_day = [1200, 1250, 1900, 1950, 2100, 2250]
     # 開始日を yymmdd の形式で取得
@@ -183,12 +192,12 @@ def pdc(first_day):
 
 
 # アイドルチャレンジ
-def idc(first_day):
+def idc(first_day, round_num):
     name = 'アイドルチャレンジ'
     # 最後に返す辞書式配列を定義
     dic = OrderedDict()
     # ラウンドスケジュール及びタイムスケジュール
-    rounds = ['第1', '第2', '第3', '第4', '第5', '第6', '最終']
+    rounds = make_round_list(round_num)
     time_first_day = [1500, 12030, 12050]
     time_mid_day = [2200, 12030, 12050]
     time_last_day = [2200, 12230, 12250]
@@ -199,7 +208,7 @@ def idc(first_day):
         # 読み込むタイムテーブルを判別
         if round == 0:
             timetable = time_first_day
-        elif round == 6:
+        elif round == round_num - 1:
             timetable = time_last_day
         else:
             timetable = time_mid_day

@@ -1,5 +1,5 @@
 """--------------------
-FlutCla's bot ver 1.1.2
+FlutCla's bot ver 1.1.3
 レファレンス : https://hackmd.io/AZJWZiG-QxaQVn7x1eTxDA
 作成 : @fl_cl_sk / @fl_cl_p
 協力 : @_apple4545_
@@ -58,8 +58,10 @@ async def on_message(message):
                 _time = message.content.split()[2]
                 # イベントの種類を取得
                 _type = message.content.split()[3]
+                # イベントのラウンド数を取得
+                _round = message.content.split()[4]
                 # Eventクラスのオブジェクトを生成
-                event = cls.Event(message.server.id, message.channel.id, client, _time, loop, _type)
+                event = cls.Event(message.server.id, message.channel.id, client, _time, loop, _type, _round)
                 # スレッドに投げて実行
                 event_thread = threading.Thread(target=event.set)
                 event_thread.start()

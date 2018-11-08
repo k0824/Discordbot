@@ -29,7 +29,8 @@ class DataBase:  # データベース用クラス
             reply_at, author = map(str, args)
             c.execute('insert into reminders values(?, ?, ?, ?, ?, ?, ?)', (str(_id), str(_time), str(msg), str(author), str(reply_at), str(guild), str(channel_id)))
         elif table == 'event_schedules':
-            c.execute('insert into event_schedules values(?, ?, ?, ?, ?)', (str(_id), str(_time), str(msg), str(guild), str(channel_id)))
+            round_num = map(str, args)
+            c.execute('insert into event_schedules values(?, ?, ?, ?, ?, ?)', (str(_id), str(_time), str(msg), str(guild), str(channel_id), str(round_num)))
         conn.commit()
 
     # データベースに登録されているリマインダー・イベント情報を返す
@@ -86,10 +87,10 @@ class DataBase:  # データベース用クラス
             remind_thread = threading.Thread(target=remind.set)
             remind_thread.start()
         # イベントの復元
-        event_list = list(map(str, c.execute('select ID, start_day, event_type, guild, channel from event_schedules')))
+        event_list = list(map(str, c.execute('select ID, start_day, event_type, guild, channel, round_num from event_schedules')))
         for item in event_list:
-            _id, _time, _type, guild, channel = map(str, item.replace('(', '').replace(')', '').replace("'", '').replace(',', '').split())
-            event = Event(guild, channel, client, _time, loop, _type, _id=_id, insert_flag=False)
+            _id, _time, _type, guild, channel, round_num = map(str, item.replace('(', '').replace(')', '').replace("'", '').replace(',', '').split())
+            event = Event(guild, channel, client, _time, loop, _type, int(round_num), _id=_id, insert_flag=False)
             event_thread = threading.Thread(target=event.set)
             event_thread.start()
 
@@ -173,9 +174,10 @@ class Remind(Schedule):
 class Event(Schedule):
     # イベント用リマインダーのみ利用する変数の初期化
     # type : msg.content.split()[3]
-    def __init__(self, guild, channel, client, time, loop, _type, _id=1000000, insert_flag=True):
+    def __init__(self, guild, channel, client, time, loop, _type, round, _id=1000000, insert_flag=True):
         super().__init__(guild, channel, client, time, loop, _id, insert_flag)
         self.type = _type
+        self.round = round
         self.table = 'event_schedules'
 
     # イベント用リマインダー設定関数
@@ -186,15 +188,15 @@ class Event(Schedule):
         time_now = datetime.now()
         # イベントタイプに応じてスケジュールを OrderedDict で取得
         if self.type == 'dlf':
-            event_schedule = event.dlf(self.time)
+            event_schedule = event.dlf(self.time, self.round)
         elif self.type == 'tbs':
-            event_schedule = event.tbs(self.time)
+            event_schedule = event.tbs(self.time, self.round)
         elif self.type == 'ltc':
-            event_schedule = event.ltc(self.time)
+            event_schedule = event.ltc(self.time, self.round)
         elif self.type == 'pdc':
-            event_schedule = event.pdc(self.time)
+            event_schedule = event.pdc(self.time, self.round)
         elif self.type == 'idc':
-            event_schedule = event.idc(self.time)
+            event_schedule = event.idc(self.time, self.round)
         else:
             event_schedule = False
         # 上の処理でエラーが起きた場合等、エラーメッセージを発言
@@ -203,7 +205,7 @@ class Event(Schedule):
             return None
         # insert_flag が True ならデータベースにイベント情報を登録
         if self.insert_flag:
-            DataBase.insert(self.id, self.time, self.type, self.table, self.guild, self.channel.id)
+            DataBase.insert(self.id, self.time, self.type, self.table, self.guild, self.channel.id, self.round)
         # 取得したイベントスケジュールに対してリマインダーを一つずつ設定
         for remind_time, remind_msg in event_schedule.items():
             if remind_time > int(time.mktime(time_now.utctimetuple())):
