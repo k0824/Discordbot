@@ -56,6 +56,8 @@ class DataBase:  # データベース用クラス
                 _type = 'ぷちデレラコレクション'
             elif _type == 'ltc':
                 _type = 'LIVEツアーカーニバル'
+            elif _type == 'idc':
+                _type = 'アイドルチャレンジ'
             if guild == _guild:
                 _time = '20{0}/{1}/{2}'.format(_time[0:2], _time[2:4], _time[4:6])
                 ret += 'ID : {0} | {1} 開始 {2}\n'.format(_id, _time, _type)
@@ -191,6 +193,8 @@ class Event(Schedule):
             event_schedule = event.ltc(self.time)
         elif self.type == 'pdc':
             event_schedule = event.pdc(self.time)
+        elif self.type == 'idc':
+            event_schedule = event.idc(self.time)
         else:
             event_schedule = False
         # 上の処理でエラーが起きた場合等、エラーメッセージを発言
