@@ -59,7 +59,10 @@ async def on_message(message):
                 # イベントの種類を取得
                 _type = message.content.split()[3]
                 # イベントのラウンド数を取得
-                _round = message.content.split()[4]
+                try:
+                    _round = message.content.split()[4]
+                except IndexError:
+                    _round = 7
                 # Eventクラスのオブジェクトを生成
                 event = cls.Event(message.server.id, message.channel.id, client, _time, loop, _type, _round)
                 # スレッドに投げて実行
@@ -87,6 +90,10 @@ async def on_message(message):
     # /neko
     elif message.content.startswith('/neko'):
         await client.send_message(message.channel, 'にゃーん')
+
+    # /nyan
+    elif message.content.startswith('/nyan'):
+        p = cls.send('にゃん', message.channel, client, loop)
 
     # idolinfo
     elif message.content.startswith('/info'):

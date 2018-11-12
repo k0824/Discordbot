@@ -215,7 +215,14 @@ def idc(first_day, round_num):
         # timetable に沿ってスケジュールを設定
         for times in timetable:
             # first_day との差delta の設定
-            delta = timedelta(days=round, seconds=((times - times % 100) / 100 * 60 + (times % 100)) * 60)
+            delta = timedelta(days=round)
+            if times >= 10000:
+                delta += timedelta(days=1)
+                time_ = times - 10000
+            else:
+                delta = delta
+                time_ = times
+            delta += timedelta(seconds=((time_ - time_ % 100) / 100 * 60 + (time_ % 100)) * 60)
             # remind_time の設定
             try:
                 remind_time = datetime.strptime(first_day, '%Y%m%d') + delta

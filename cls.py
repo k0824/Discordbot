@@ -15,7 +15,7 @@ def gen_id():
 
 # メッセージ送信用関数
 def send(msg, channel, client, loop):
-    asyncio.ensure_future(client.send_message(channel, msg), loop=loop)
+    return asyncio.ensure_future(client.send_message(channel, msg), loop=loop)
 
 
 class DataBase:  # データベース用クラス
