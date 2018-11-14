@@ -197,6 +197,8 @@ class Event(Schedule):
             event_schedule = event.pdc(self.time, self.round)
         elif self.type == 'idc':
             event_schedule = event.idc(self.time, self.round)
+        elif self.type == 'pmf':
+            event_schedule = event.pmf(self.time)
         else:
             event_schedule = False
         # 上の処理でエラーが起きた場合等、エラーメッセージを発言

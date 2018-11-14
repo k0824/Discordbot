@@ -236,3 +236,43 @@ def idc(first_day, round_num):
             elif timetable.index(times) % 3 == 2:
                 dic[remind_time] = name + ' ' + rounds[round] + 'ラウンド終了10分前です。'
     return dic
+
+
+# プロダクションマッチフェスティバル
+def pmf(first_day):
+    name = 'プロダクションマッチフェスティバル'
+    # 最後に返す辞書式配列を定義
+    dic = OrderedDict()
+    # タイムスケジュール
+    timetable = [1500, 1630, 1650, 2000, 2130, 2150,
+                 11200, 11230, 11250, 11700, 11830, 11850, 12100, 12230, 12250,
+                 21200, 21230, 21250, 21700, 21830, 21850, 22100, 22230, 22250,
+                 31200, 31230, 31250, 31700, 31830, 31850, 32100, 32230, 32250,
+                 42000, 42230, 42250]
+    # 開始日を yymmdd の形式で取得
+    first_day = '20' + first_day
+    # timetable に沿ってスケジュールを設定
+    for i, times in enumerate(timetable):
+        # first_day との差delta の設定
+        delta = timedelta()
+        while times >= 10000:
+            delta += timedelta(days=1)
+            times = times - 10000
+        delta += timedelta(seconds=((times - times % 100) / 100 * 60 + (times % 100)) * 60)
+        # remind_time の設定
+        try:
+            remind_time = datetime.strptime(first_day, '%Y%m%d') + delta
+        except:
+            return False
+        remind_time = int(time.mktime(remind_time.utctimetuple()))
+        if i // 3 + 1 != 12:
+            battle = '第{0}'.format(i // 3 + 1)
+        else:
+            battle = '最終'
+        if i % 3 == 0:
+            dic[remind_time] = '{0} 第{1}戦開始です'.format(name, battle)
+        elif i % 3 == 0:
+            dic[remind_time] = '{0} 第{1}戦終了30分前です'.format(name, battle)
+        elif i % 3 == 0:
+            dic[remind_time] = '{0} 第{1}戦終了10分前です'.format(name, battle)
+    return dic
