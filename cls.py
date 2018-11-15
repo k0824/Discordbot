@@ -29,7 +29,7 @@ class DataBase:  # データベース用クラス
             reply_at, author = map(str, args)
             c.execute('insert into reminders values(?, ?, ?, ?, ?, ?, ?)', (str(_id), str(_time), str(msg), str(author), str(reply_at), str(guild), str(channel_id)))
         elif table == 'event_schedules':
-            round_num = map(str, args)
+            round_num = list(map(str, args))[0]
             c.execute('insert into event_schedules values(?, ?, ?, ?, ?, ?)', (str(_id), str(_time), str(msg), str(guild), str(channel_id), str(round_num)))
         conn.commit()
 
