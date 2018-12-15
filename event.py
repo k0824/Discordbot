@@ -13,6 +13,28 @@ def make_round_list(num):
     return rounds
 
 
+def switch(event_type, first_day, round_num):
+    if event_type == 'dlf':
+        event_schedule = dlf(first_day, round_num)
+    elif event_type == 'tbs':
+        event_schedule = tbs(first_day, round_num)
+    elif event_type == 'ltc':
+        event_schedule = ltc(first_day, round_num)
+    elif event_type == 'pdc':
+        event_schedule = pdc(first_day, round_num)
+    elif event_type == 'idc':
+        event_schedule = idc(first_day, round_num)
+    elif event_type == 'pmf':
+        event_schedule = pmf(first_day)
+    elif event_type == 'idr':
+        event_schedule = idr(first_day, round_num)
+    elif event_type == 'idp':
+        event_schedule = idp(first_day, round_num)
+    else:
+        event_schedule = False
+    return event_schedule
+
+
 # ドリームLIVEフェスティバル
 def dlf(first_day, round_num):
     name = 'ドリームLIVEフェスティバル'
@@ -270,9 +292,106 @@ def pmf(first_day):
         else:
             battle = '最終'
         if i % 3 == 0:
-            dic[remind_time] = '{0} 第{1}戦開始です'.format(name, battle)
-        elif i % 3 == 0:
-            dic[remind_time] = '{0} 第{1}戦終了30分前です'.format(name, battle)
-        elif i % 3 == 0:
-            dic[remind_time] = '{0} 第{1}戦終了10分前です'.format(name, battle)
+            dic[remind_time] = '{0} {1}戦開始です'.format(name, battle)
+        elif i % 3 == 1:
+            dic[remind_time] = '{0} {1}戦終了30分前です'.format(name, battle)
+        elif i % 3 == 2:
+            dic[remind_time] = '{0} {1}戦終了10分前です'.format(name, battle)
+    return dic
+
+
+# アイドルLIVEロワイヤル
+def idr(first_day, round_num):
+    name = 'アイドルLIVEロワイヤル'
+    # 最後に返す辞書式配列を定義
+    dic = OrderedDict()
+    # ラウンドスケジュール及びタイムスケジュール
+    rounds = make_round_list(round_num)
+    time_first_day = [1500, 12030, 12050]
+    time_mid_day = [2200, 12030, 12050]
+    time_last_day = [2200, 12230, 12250]
+    # 開始日を yymmdd の形式で取得
+    first_day = '20' + first_day
+    # 各ラウンドのタイムスケジュールを処理 第nラウンドはround=n-1であることに注意
+    for round in range(len(rounds)):
+        # 読み込むタイムテーブルを判別
+        if round == 0:
+            timetable = time_first_day
+        elif round == round_num - 1:
+            timetable = time_last_day
+        else:
+            timetable = time_mid_day
+        # timetable に沿ってスケジュールを設定
+        for times in timetable:
+            # first_day との差delta の設定
+            delta = timedelta(days=round)
+            if times >= 10000:
+                delta += timedelta(days=1)
+                time_ = times - 10000
+            else:
+                delta = delta
+                time_ = times
+            delta += timedelta(seconds=((time_ - time_ % 100) / 100 * 60 + (time_ % 100)) * 60)
+            # remind_time の設定
+            try:
+                remind_time = datetime.strptime(first_day, '%Y%m%d') + delta
+            except:
+                return False
+            remind_time = int(time.mktime(remind_time.utctimetuple()))
+            if timetable.index(times) % 3 == 0:
+                dic[remind_time] = name + ' ' + rounds[round] + 'ラウンド開始です。'
+            elif timetable.index(times) % 3 == 1:
+                dic[remind_time] = name + ' ' + rounds[round] + 'ラウンド終了30分前です。'
+            elif timetable.index(times) % 3 == 2:
+                dic[remind_time] = name + ' ' + rounds[round] + 'ラウンド終了10分前です。'
+    return dic
+
+
+# アイドルプロデュース
+def idp(first_day, round_num):
+    name = 'アイドルプロデュース'
+    # 最後に返す辞書式配列を定義
+    dic = OrderedDict()
+    # ラウンドスケジュール及びタイムスケジュール
+    rounds = []
+    for i in range(round_num)[0:-1]:
+        rounds.append('{0}日目'.format(i+1))
+    rounds.append('最終日')
+    time_first_day = [1500, 12030, 12050]
+    time_mid_day = [2200, 12030, 12050]
+    time_last_day = [2200, 12230, 12250]
+    # 開始日を yymmdd の形式で取得
+    first_day = '20' + first_day
+    # 各ラウンドのタイムスケジュールを処理 第nラウンドはround=n-1であることに注意
+    for round in range(len(rounds)):
+        # 読み込むタイムテーブルを判別
+        if round == 0:
+            timetable = time_first_day
+        elif round == round_num - 1:
+            timetable = time_last_day
+        else:
+            timetable = time_mid_day
+        # timetable に沿ってスケジュールを設定
+        for times in timetable:
+            # first_day との差delta の設定
+            delta = timedelta(days=round)
+            if times >= 10000:
+                delta += timedelta(days=1)
+                time_ = times - 10000
+            else:
+                delta = delta
+                time_ = times
+            delta += timedelta(seconds=((time_ - time_ % 100) / 100 * 60 + (time_ % 100)) * 60)
+            # remind_time の設定
+            try:
+                remind_time = datetime.strptime(first_day, '%Y%m%d') + delta
+            except:
+                return False
+            remind_time = int(time.mktime(remind_time.utctimetuple()))
+            if timetable.index(times) % 3 == 0:
+                dic[remind_time] = name + ' ' + rounds[round] + '開始です。'
+            elif timetable.index(times) % 3 == 1:
+                dic[remind_time] = name + ' ' + rounds[round] + '終了30分前です。'
+            elif timetable.index(times) % 3 == 2:
+                dic[remind_time] = name + ' ' + rounds[round] + '終了10分前です。'
     return dic

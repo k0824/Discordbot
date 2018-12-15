@@ -187,20 +187,7 @@ class Event(Schedule):
         # 現在時刻を取得
         time_now = datetime.now()
         # イベントタイプに応じてスケジュールを OrderedDict で取得
-        if self.type == 'dlf':
-            event_schedule = event.dlf(self.time, self.round)
-        elif self.type == 'tbs':
-            event_schedule = event.tbs(self.time, self.round)
-        elif self.type == 'ltc':
-            event_schedule = event.ltc(self.time, self.round)
-        elif self.type == 'pdc':
-            event_schedule = event.pdc(self.time, self.round)
-        elif self.type == 'idc':
-            event_schedule = event.idc(self.time, self.round)
-        elif self.type == 'pmf':
-            event_schedule = event.pmf(self.time)
-        else:
-            event_schedule = False
+        event_schedule = event.switch(self.type, self.time, self.round)
         # 上の処理でエラーが起きた場合等、エラーメッセージを発言
         if event_schedule is False:
             asyncio.async(self.client.send_message(self.channel, '入力形式が間違っています。 /sched event dlf 180731 のように入力してください。'), loop=self.loop)
